@@ -1,0 +1,141 @@
+#setLanguageLevel 3;
+
+/*
+ * Transforms 'this short sentence' to 'This Short Sentence'. Useful for names.
+ */
+String capitalizeWords(String sentence)
+{
+  String newSentence;
+  String[] words = sentence.split(" ");
+  for (Integer i = 0; i < words.length(); i++)
+  {
+    String word = words[i];
+    if (word.getLength() > 1)
+      word = word.subString(0,1).toUpper() + word.subString(1,sentence.getLength()-1);
+    newSentence += word + " ";
+  }
+  return newSentence.stripLeadingAndTrailing(" ");
+}
+
+/*
+ * Does the string contain alphanumeric chars? (a-Z or numbers)
+ */
+Bool containsAlphaNumericChar(String s)
+{
+  for (Integer i = 0; i < s.getLength(); i++)
+  {
+    String char = s.subString(i,1);
+    if (char.isAlphanumeric())
+      return true;
+  }
+  return false;
+}
+
+/*
+ * Adds a thousand separator.
+ * Example: formats string "1000000" as "1 000 000";
+ */
+String formatStringAsThousandSeparated(String number)
+{
+ Integer len = number.getLength() - 3;
+ while (len > 0)
+ {
+  number = number.subString(0, len) + " " + number.subString(len, number.getLength() - len);
+  len -= 3;
+ }
+ return number;
+}
+
+/*
+ * Finding multiple matches of a regexp pattern in a string.
+ * Useful since regexp in CRMScript only gives first result back.
+ */
+String[] getAllMatches(String pattern, String text) {
+  String[] result;
+  String[] matches = text.regexp(pattern);
+  while (matches.length() > 0) {
+    String match = matches[1];
+    result.pushBack(match);
+    matches.clear();
+    text = text.after(match);
+    matches = text.regexp(pattern);
+  }
+  return result;
+}
+
+/*
+ * Gets the value from the first element, or an empty string.
+ */
+String getFirstOrEmpty(NSEntityElement[] elements)
+{
+  if (elements.length() == 0)
+    return "";
+  else
+    return elements[0].GetValue();
+}
+  
+
+/*
+ * Adds chars to the beginning to the string, so that we achieve the desired length.
+ * Assumes that the char-string contains just ONE character.
+ */
+String padLeft(String text, Integer desiredLength, String char) {
+  Integer difference = desiredLength - text.getLength();
+  String pad = "";
+  for (Integer i = 0; i < difference; i++) {
+    pad.append(char);
+  }
+  return pad + text;
+}
+
+/*
+ * Accepts a long string, and will split it up into 'length' long segments.
+ * Useful for splitting up long texts into pretty lines.
+ */
+Vector prettySplit(String text, Integer length, String delimiter)
+{
+  Integer totalLength = text.getLength();
+  Vector result;
+  Bool eol = false;
+  Integer cursorIndex = 0;
+
+  while (!eol)
+  {
+    //Grab the next x characters
+    String line = text.subString(cursorIndex, length);
+
+    //Is that line shorter than the max length we've set the line to, then we've reached the end.
+    if (line.getLength() < length)
+    {
+      result.pushBack(line.stripLeadingAndTrailing(delimiter));
+      break;
+    }
+    else
+    {
+      //Find the last delimiter in the line.
+      Integer lastDelimIndex = line.findLast(delimiter);
+
+      if (lastDelimIndex <= 0)
+      {
+        //If no delimiter found, then we grab a full line.
+        result.pushBack(line.subString(0, length-1).stripLeadingAndTrailing(delimiter));
+        cursorIndex += length-1;
+      }
+      else
+      {
+        //If a delimiter was found, then grab the text up until that delimiter
+        result.pushBack(line.subString(0, lastDelimIndex).stripLeadingAndTrailing(delimiter));
+        cursorIndex += lastDelimIndex;
+      }
+    }
+  }
+  
+  return result;
+}
+
+/*
+ * Inspired by metohod in C++'s string.h
+ */
+Integer strlen(String text) {
+  return text.getLength();
+}

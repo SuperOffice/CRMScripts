@@ -1,0 +1,40 @@
+#setLanguageLevel 3;
+
+/*
+ * Helpermethods for doing authentication related tasks.
+ */
+
+//Create a hash of the given password. Hashing method is done by SuperOfice.
+String hashPassword(String password) {
+  //Setting the password property, and retrieving value again will return the hashed value.
+  Customer c;
+  c.setValue("password", password); 
+  return c.getValue("password");
+}
+
+//Given a customer-username (typically an e-mailaddress) and password, 
+//attempt to login as that user. If successfull then customer object
+//is returned. If not an exception is thrown.
+Customer loginAsCustomer(String username, String password) {
+  
+  //Create a hash of the plaintext password.
+  String hashedPassword = hashPassword(password);
+  
+  //Look for a user that has the given username and hashed password.
+  SearchEngine se;
+  se.addField("user_candidate.person_id");
+  se.addCriteria("user_candidate.secret_key", "equals", username);
+  se.addCriteria("user_candidate.secret_value", "equals", hashedPassword);
+  for (se.execute(); !se.eof(); se.next())
+  {
+    //Success - Found user.
+    Integer personId = se.getField("user_candidate.person_id").toInteger();
+    Customer c;
+    c.load(personId);
+    c.login();
+    return c;
+  }
+  
+  //Fail - not a valid username/password pair.
+  throw "Authentication failed";
+}
