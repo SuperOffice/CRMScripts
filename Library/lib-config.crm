@@ -45,7 +45,7 @@ Void setRegistryValue(Integer reg_id, String value) {
 /*
  * Get value from extratable y_config
  */
-String getConfigValue(String key) {
+String getConfigVariable(String key) {
   SearchEngine se;
   se.addField("y_config.x_value");
   se.addCriteria("y_config.x_key", "equals", key);
@@ -55,9 +55,22 @@ String getConfigValue(String key) {
 }
 
 /*
+ * Get ALL values from extratable y_config
+ */
+Map getConfigVariables() {
+  Map result;
+  SearchEngine se;
+  se.addField("y_config.x_key");
+  se.addField("y_config.x_value");
+  for (se.execute(); !se.eof(); se.next())
+    result.insert(se.getField("y_config.x_key"), se.getField("y_config.x_value"));
+  return result;
+}
+
+/*
  * Set value in extratable y_config
  */
-Void setConfigValue(String key, String value) {
+Void setConfigVariable(String key, String value) {
   //Find ID of existing - if any.
   Integer id;
   SearchEngine se;
@@ -73,5 +86,4 @@ Void setConfigValue(String key, String value) {
   config.setValue("x_key", key);
   config.setValue("x_value", value);
   config.save();
-  //return;
 }

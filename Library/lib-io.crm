@@ -13,3 +13,16 @@ String[] getFiles(String filter) {
 	String[] files = runProgram(cmd).split('\r\n');
   return files;
 }
+
+Bool directoryExists(String directory)
+{
+  directory = directory.substitute("\\\\", "\\");
+  String command = "if exist \"" + directory + "\" (echo 1) else (echo 0)";
+  String result = runProgram("cmd.exe /c " + command);
+  return result.toBool();
+}
+
+String createDirectory(String directory) {
+  String command = "mkdir " + directory;
+  return runProgram("cmd.exe /c " + command);
+}

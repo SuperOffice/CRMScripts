@@ -1,8 +1,8 @@
 #setLanguageLevel 3;
 
 /*
- * Frode Lillerud, Ganske Enkelt AS, may 2016
  * Methods for setting HTTP responses from Customer Service.
+ * See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status
  */
 
 //Set default headers. Disable caching for IE.
@@ -43,6 +43,9 @@ Void Ok()
   SetHttpStatus("200 OK");
 }
 
+Void OK() { Ok(); }
+Void OK(String location) { Ok(location); }
+
 Void Created(String location)
 {
   AddHttpHeader("Location", location);
@@ -52,6 +55,17 @@ Void Created(String location)
 Void NoContent()
 {
   SetHttpStatus("204 No Content");
+}
+
+Void Found(String location)
+{
+  AddHttpHeader("Location", location);
+  return SetHttpStatus("302 Found");
+}
+
+Void Redirect(String location) //Helper
+{
+  Found(location);
 }
 
 Void BadRequest()
@@ -83,6 +97,18 @@ Void MethodNotAllowed()
   SetHttpStatus("405 Method Not Allowed");
 }
 
+Void RequestTimeout() {
+  SetHttpStatus("408 Request Timeout");
+}
+
+Void Conflict() {
+  SetHttpStatus("409 Conflict");
+}
+
+Void IAmATeapot() {
+  SetHttpStatus("418 I'm a Teapot");
+}
+
 Void InternalError(String message)
 {
   SetHttpStatus("500 Internal Error");
@@ -92,12 +118,6 @@ Void InternalError(String message)
 Void NotImplemented()
 {
   SetHttpStatus("501 Not Implemented");
-}
-
-Void Redirect(String location)
-{
-  AddHttpHeader("Location", location);
-  return SetHttpStatus("302 Found");
 }
 
 Void TooManyRequests(Integer retryAfter)

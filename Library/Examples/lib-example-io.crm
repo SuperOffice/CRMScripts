@@ -10,3 +10,12 @@ for (Integer i = 0; i < files.length(); i++) {
   String filename = files[i];
   printLine(filename);
 }
+
+String newDir = "C:\\Temp\\d\\e\\f\\g\\h"; //or relative dir: a\\b\\c
+if (!directoryExists(newDir))
+{
+  printLine(createDirectory(newDir));
+  printLine("Created directory: " + newDir);
+}
+else
+  printLine("Directory " + newDir + " allready exists");

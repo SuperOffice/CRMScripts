@@ -134,7 +134,8 @@ Vector prettySplit(String text, Integer length, String delimiter)
 }
 
 /*
- * Inspired by metohod in C++'s string.h
+ * Get string length.
+ * Inspired by method in C++'s string.h
  */
 Integer strlen(String text) {
   return text.getLength();
