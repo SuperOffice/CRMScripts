@@ -1,0 +1,40 @@
+Integer taskId = ...; //  Id of the task type (task.task_idx)
+Integer taskOwnerAssociateId = ...; // Id of the associate which the task should be assigned to (associate.associate_id)
+
+Integer contactId = ...; // Id of the contact the task should be connected to, can be 0 (contact.contact_id)
+Integer personId = ...; // Id of the person the task should be connected to, can be 0 (person.person_id)
+
+String taskDescription = "This is a new task!";
+
+NSAppointmentAgent appAgent;
+NSAppointmentEntity newApp = appAgent.CreateDefaultAppointmentEntityByTypeAndAssociate(6, taskOwnerAssociateId); // https://community.superoffice.com/documentation/sdk/SO.NetServer.Web.Services/html/T_SuperOffice_Data_TaskType.htm
+newApp.SetDescription(taskDescription);
+
+NSContact contact;
+contact.SetContactId(contactId);
+newApp.SetContact(contact);
+
+NSPerson person;
+person.SetPersonId(personId);
+newApp.SetPerson(person);
+
+DateTime start;
+start.addDay(1);
+start.moveToDayStart();
+
+newApp.SetActiveDate(start);
+newApp.SetStartDate(start);
+
+DateTime end;
+end.addDay(1);
+end.moveToDayStart();
+
+newApp.SetEndDate(end);
+
+NSTaskListItem task;
+task.SetTaskListItemId(taskId);
+
+newApp.SetTask(task);
+newApp.SetAssignmentStatus(11); // https://community.superoffice.com/documentation/sdk/SO.NetServer.Web.Services/html/T_SuperOffice_Data_AssignmentStatus.htm
+				
+newApp = appAgent.SaveAppointmentEntity(newApp);
