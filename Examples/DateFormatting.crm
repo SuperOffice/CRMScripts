@@ -1,0 +1,42 @@
+#setLanguageLevel 3;
+ 
+// Format an unlimited date field from crm to an CS Date field instance
+// Don't make it an DateTime since that doesn't support empty date's
+Date MakeDateFromUnlimitedDate(String unlimitedDate)
+{
+    // when empty, set to (00000000) 0000-00-00, will shown up as empty on screen
+    if (unlimitedDate == "")
+    {
+        unlimitedDate = "00000000";
+    }
+ 
+    // change date from 20170101 to 2017-01-01, so that CRMScript parses it to a date
+    String FormattedStringDate = unlimitedDate.subString(0,4) + "-" + unlimitedDate.subString(4,2) + "-" + unlimitedDate.subString(6,2);
+ 
+    return FormattedStringDate.toDate();
+}
+ 
+// convert unix timestamp to DateTime, usefull for converting UDEF date to datetime
+DateTime MakeDateTimeFromUnixTimestamp(Integer unixTimeStamp)
+{
+    DateTime dateTime;
+   
+    dateTime.setUnix(unixTimeStamp);
+ 
+    return dateTime;
+}
+ 
+// Format date, since the Date class doesn't have an toString(format) option, we change the date to an datetime
+String FormatDate(Date inputDate)
+{
+    // return empty when date is empty, datetime can't handle empty fields.
+    if (inputDate.toString() == "")
+    {
+        return "";
+    }
+ 
+    DateTime inputDateTime = inputDate.toString().toDateTime();
+ 
+    // DD2.MM2.YY4 01.01.2017
+    return inputDateTime.toString("DD2.MM2.YY4");
+}

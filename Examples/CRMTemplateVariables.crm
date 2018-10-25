@@ -1,0 +1,23 @@
+// The following example shows you can use and substituate the CRM template variables in CRMScript
+#setLanguageLevel 3;
+ 
+ 
+NSDocumentAgent documentAgent;
+ 
+String orginalText = "Hello, Company <name>";
+ 
+Integer encoding = 0; // see https://community.superoffice.com/documentation/sdk/SO.NetServer.Web.Services/html/T_SuperOffice_Data_GeneratorEncoding.htm
+ 
+Integer contactId = 1055;
+Integer personId = 0;
+Integer appointmentId = 0;
+Integer documentId = 0;
+Integer saleId = 0;
+Integer selectionId = 0;
+Integer projectId = 0;
+ 
+String cultureName = "";// empty is use current culture
+ 
+String replacedText = documentAgent.SubstituteTemplateVariables(orginalText, encoding, contactId, personId, appointmentId, documentId, saleId, selectionId, projectId, cultureName);
+ 
+print(replacedText);

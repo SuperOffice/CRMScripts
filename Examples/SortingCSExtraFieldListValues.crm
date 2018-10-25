@@ -1,0 +1,90 @@
+#setLanguageLevel 3;
+
+// alphabetically sort the list values of an text field
+// domain = domain of the extra_field, 4 = ticket, can be set to 0 to disable criteria
+// extraTableId = Id of the extra table that the field is from,  can be set to 0 to disable criteria
+// fieldName = name of the field, without the table prefix, example : x_product
+// returns false when field not found, otherwise true
+Bool sortExtraFieldOptions(Integer domain, Integer extraTableId, String fieldName)
+{
+    // Get current field params
+    SearchEngine extraFieldParamSearch;
+  
+    extraFieldParamSearch.addField("extra_fields.id");
+    extraFieldParamSearch.addField("extra_fields.params");
+  
+    if (domain > 0)
+    {
+    		extraFieldParamSearch.addCriteria("extra_fields.domain", "OperatorEquals", domain.toString());
+    }
+  
+    if (extraTableId > 0)
+    {
+    		extraFieldParamSearch.addCriteria("extra_fields.target_extra_table", "OperatorEquals", extraTableId.toString());
+    }
+  
+    extraFieldParamSearch.addCriteria("extra_fields.field_name", "OperatorEquals", fieldName);
+  
+    extraFieldParamSearch.setLimit(1);
+    extraFieldParamSearch.execute();
+
+    if (!extraFieldParamSearch.eof())
+    {
+      	// params are split by \n
+        String[] parameters = extraFieldParamSearch.getField("extra_fields.params").split("\n");
+
+      	// use map since the keys are automatically sorted alphabetically on insert
+        Map sortedOptions;
+
+      	// string array of the existing parameters that aren't list options + the options now sorted alphabetically
+        String[] newParameters;
+
+        for (Integer i = 0; i < parameters.length(); i++)
+        {
+           // get the parameter value, make sure we dont have an \n in it since it the \n is used as parameter delimter
+            String parameter = parameters[i].stripLeadingAndTrailing("\n");
+
+            // if parameters starts with 'option=' it means this is a list option parameter
+            if (parameter.beginsWith("option="))
+            {
+              	// get the list option value
+                String option = parameter.after("option=");
+
+                sortedOptions.insert(option, "");
+            }
+            else // none list option parameter, add directly to new parameters array
+            {
+                newParameters.pushBack(parameter + "\n");
+            }
+        }
+
+      	// add the now sorted list values back as option parameter
+        for (sortedOptions.first(); !sortedOptions.eof(); sortedOptions.next())
+        {
+            newParameters.pushBack("option=" + sortedOptions.getKey() + "\n");
+        }
+
+        String newParametersString;
+
+      	// concat the new parameters back to a single string
+        for (Integer i = 0; i < newParameters.length(); i++)
+        {
+            newParametersString += newParameters[i];
+            print(newParameters[i]);
+        }
+
+      	// update params in the database
+        SearchEngine extraFieldParamUpdate;
+        extraFieldParamUpdate.addData("extra_fields.params", newParametersString);
+        extraFieldParamUpdate.addCriteria("extra_fields.id", "OperatorEquals", extraFieldParamSearch.getField("extra_fields.id"));     
+      
+        extraFieldParamUpdate.update();
+      
+      	return true;
+    } 
+  
+    return false;
+}
+
+// Example usage:
+sortExtraFieldOptions(4, 0, "x_area");

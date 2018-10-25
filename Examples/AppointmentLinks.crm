@@ -1,0 +1,26 @@
+#setLanguageLevel 3;
+
+// existing appointment to link the new appointment to
+Integer existingAppointmentId = ...;
+
+NSAppointmentAgent appointmentAgent;
+
+// create new appointment
+NSAppointmentEntity appointmentEntity = appointmentAgent.CreateDefaultAppointmentEntity();
+
+// set appointment properties etc...
+
+NSLink[] appointmentLinks = appointmentEntity.GetLinks();
+
+// add new appointment link
+NSLink existingAppointmentLink;
+existingAppointmentLink.SetId(existingAppointmentId); // appointment / document / sale
+existingAppointmentLink.SetEntityName("appointment"); // appointment / document / sale
+appointmentLinks.pushBack(existingAppointmentLink);
+
+
+// add to the links array
+appointmentEntity.SetLinks(appointmentLinks);
+
+// save appointment
+appointmentEntity = appointmentAgent.SaveAppointmentEntity(appointmentEntity);
