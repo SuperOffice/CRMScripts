@@ -1,0 +1,38 @@
+// Calculate the amount of business days (monday - friday) between the two given date's, inclusive.
+Integer getBusinessDaysBetween(Date minDate, Date maxDate)
+{
+  	if (maxDate < minDate) { throw "maxDate can't be lower then minDate"; }
+  
+  	Integer daysBetween = 0;
+  	
+  	while (minDate <= maxDate)
+    {
+      	if (minDate.getWeekDay() != 5 && minDate.getWeekDay() != 6) // saturday or sunday
+        {
+          	daysBetween = daysBetween + 1;
+        }
+      
+      	minDate = minDate.addDay(1);
+    }
+  
+  	return daysBetween;
+}
+
+// add x days to date, and make sure the the new data is on a working day
+Date addBusinessDays(Date currentDate, Integer addDays)
+{
+		Date newDate = currentDate.addDay(addDays);
+  
+  	// Saturday, add two days so we get to monday
+		if (newDate.getWeekDay() == 5)
+		{
+				newDate.addDay(2);
+		} 
+  	// Sunday, add one day so we get to monday
+		else if (newDate.getWeekDay() == 6)
+		{
+				newDate.addDay(1);
+		}
+  
+  	return newDate;
+}
