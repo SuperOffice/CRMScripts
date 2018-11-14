@@ -12,3 +12,58 @@ String[] sortedWords = bubbleSort(randomWords);
 //Print out sorted words
 for (Integer i = 0; i < sortedWords.length(); i++)
   printLine(sortedWords[i]);
+
+
+
+// Test QuickSorterString
+
+QuickSorterString QuickSorterString()
+{
+  QuickSorterString sorter;
+  return sorter;
+}
+
+String[7] stringList;
+stringList[0] = "One";
+stringList[1] = "Two";
+stringList[2] = "Three";
+stringList[3] = "Four";
+stringList[4] = "Five";
+stringList[5] = "Six";
+stringList[6] = "Seven";
+
+QuickSorterString s = QuickSorterString();
+
+printLine("_before sort_");
+s.printList(stringList);
+
+s.sort(stringList);
+printLine("_after sort_");
+s.printList(stringList);
+
+
+// Test QuickSorterInteger
+
+QuickSorterInteger QuickSorterInteger()
+{
+  QuickSorterInteger sorter;
+  return sorter;
+}
+
+Integer[7] numberList;
+numberList[0] = 1;
+numberList[1] = 2;
+numberList[2] = 3;
+numberList[3] = 4;
+numberList[4] = 1;
+numberList[5] = 2;
+numberList[6] = 3;
+
+QuickSorterInteger si = QuickSorterInteger();
+
+printLine("_before sort_");
+si.printList(numberList);
+
+si.sort(numberList);
+printLine("_after sort_");
+si.printList(numberList);

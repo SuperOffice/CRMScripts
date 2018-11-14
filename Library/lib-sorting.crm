@@ -22,3 +22,162 @@ String[] bubbleSort(String[] items) {
   }
   return items;
 }
+
+/*
+ * QuickSort strings in array alphabetically
+ */
+
+struct QuickSorterString
+{
+  String[] array;
+  Integer length;
+
+  Void swapNumbers(Integer i, Integer j)
+  {
+    String temp = this.array[i];
+    this.array[i] = this.array[j];
+    this.array[j] = temp;
+  }
+
+  Void quickSort(Integer lowerIndex, Integer higherIndex)
+  {
+    Integer i = lowerIndex;
+    Integer j = higherIndex;
+
+    // calculate pivot number, I am taking pivot as middle index number
+    String pivot = this.array[lowerIndex+(higherIndex-lowerIndex)/2];
+
+    // Divide into two arrays
+    while (i <= j)
+    {
+      while (this.array[i] < pivot) {
+        i++;
+      }
+      while (this.array[j] > pivot) {
+        j--;
+      }
+      if (i <= j) {
+        this.swapNumbers(i, j);
+        //move index to next position on both sides
+        i++;
+        j--;
+      }
+    }
+
+    // call quickSort() method recursively
+    if (lowerIndex < j)
+    {
+        this.quickSort(lowerIndex, j);
+    }
+    if (i < higherIndex)
+    {
+      this.quickSort(i, higherIndex);
+    }
+  }
+
+  Void sort(String[] inputArr)
+  {
+    if (inputArr.length() == 0)
+    {
+      return;
+    }
+
+    this.array = inputArr;
+    this.length = inputArr.length();
+
+    this.quickSort(0, this.length - 1);
+  }
+
+
+
+  Void printList(String[] list)
+  {
+    this.array = list;
+
+    for(Integer i = 0; i < list.length(); i++)
+    {
+      printLine( list[i] );
+    }
+
+  }
+};
+
+
+/*
+ * QuickSort integer array numerically
+ */
+struct QuickSorterInteger
+{
+  Integer[] array;
+  Integer length;
+
+  Void swapNumbers(Integer i, Integer j)
+  {
+    Integer temp = this.array[i];
+    this.array[i] = this.array[j];
+    this.array[j] = temp;
+  }
+
+  Void quickSort(Integer lowerIndex, Integer higherIndex)
+  {
+    Integer i = lowerIndex;
+    Integer j = higherIndex;
+
+    // calculate pivot number, I am taking pivot as middle index number
+    Integer pivot = this.array[lowerIndex+(higherIndex-lowerIndex)/2];
+
+    // Divide into two arrays
+    while (i <= j)
+    {
+      while (this.array[i] < pivot) {
+        i++;
+      }
+      while (this.array[j] > pivot) {
+        j--;
+      }
+      if (i <= j) {
+        this.swapNumbers(i, j);
+        //move index to next position on both sides
+        i++;
+        j--;
+      }
+    }
+
+    // call quickSort() method recursively
+    if (lowerIndex < j)
+    {
+        this.quickSort(lowerIndex, j);
+    }
+    if (i < higherIndex)
+    {
+      this.quickSort(i, higherIndex);
+    }
+  }
+
+  Void sort(Integer[] inputArr)
+  {
+    if (inputArr.length() == 0)
+    {
+      return;
+    }
+
+    this.array = inputArr;
+    this.length = inputArr.length();
+
+    this.quickSort(0, this.length - 1);
+  }
+
+
+
+  Void printList(Integer[] list)
+  {
+    this.array = list;
+
+    for(Integer i = 0; i < list.length(); i++)
+    {
+      printLine( list[i].toString() );
+    }
+
+  }
+};
+
