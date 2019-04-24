@@ -1,0 +1,23 @@
+#setLanguageLevel 3;
+
+#include "lib-jwt";
+
+
+/* Test runner */
+String jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0IjoidGVzdCIsIm5iZiI6MTU0NDc5NDM4NSwiZXhwIjoxNTQ0Nzk3OTg1LCJpc3MiOiJ1cm46aXNzdWVyIiwiYXVkIjoidXJuOmF1ZGllbmNlIn0.j7IvVznXz39D67VmyCtSeqy1YkhKp3oV7Dk_4_Ic6Ok";
+String key = "25p3FLoTPpb+hoMtb4DTBqFfqWFKfESg45/zCbTcqmk="; //32 byte array base64 encoded
+
+JwtValidationParameters para = CreateDefaultJwtValidationParameters("urn:audience", "urn:issuer", key);
+JwtValidationResult result = ParseJwt(para, jwt);
+print("Result: " + result.IsValid.toString() + " Error: " + result.ErrorMessage);
+
+JwtCreationParameters newJwtParameters = CreateDefaultJwtCreationParameters("urn:audience", "urn:issuer", key);
+JSONBuilder jb;
+jb.pushObject("");
+String newJwt = CreateJwt(newJwtParameters, jb);
+print("\nCreated JWT: " + newJwt);
+
+result = ParseJwt(para, newJwt);
+print("Result (new jwt): " + result.IsValid.toString() + " Error: " + result.ErrorMessage);
+
+

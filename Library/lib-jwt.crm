@@ -1,0 +1,288 @@
+#setLanguageLevel 3;
+/* Script for creating and validating JWT tokens. */
+/* Licence: MIT */
+
+
+/* 
+Known limitations:
+Only HS256 is supported due to lack of support for other cryptographic primitives in CS.
+*/
+
+
+/*
+Basic usage for verifying tokens: 
+The key (256 bit) must be in a BASE64 format (32 bytes).
+
+JwtValidationParameters para = CreateDefaultJwtValidationParameters("urn:audience", "urn:issuer", key);
+JwtValidationResult result = ParseJwt(para, jwt);
+
+Always check the member property IsValid on the JwtValidationResult.
+The property ErrorMessage will point to what did fail. It will be empty if IsValid is true.
+The claims in the JWT will be in the member property Claims.
+*/
+
+
+struct JwtValidationResult
+{
+  Bool IsValid;
+  String ErrorMessage;
+  
+  String Audience;
+  String Issuer;
+  String Algorithm;
+  
+  DateTime ExpiresAt;
+  DateTime NotBefore;
+  
+  XMLNode Claims;
+};
+
+
+struct JwtCreationParameters 
+{
+  String Issuer;
+  String Audience;
+  String SignatureKey;
+  DateTime ExpiresAt;
+  DateTime NotBefore;
+};
+
+struct JwtValidationParameters 
+{  
+  String ValidAudience;
+  Bool ValidateAudience;
+  String ValidIssuer;
+  Bool ValidateIssuer;
+  
+	Bool ValidateSignature;
+  String SignatureKey;  
+  
+  Bool ValidateNotBefore;
+  Bool ValidateExpiresAt;
+  Integer ValidLifeTimeInMinutes;
+};
+
+
+JwtValidationParameters CreateDefaultJwtValidationParameters(String audience, String issuer, String signatureKey)
+{
+  JwtValidationParameters parameters;
+  parameters.ValidateAudience = true;
+  parameters.ValidAudience = audience;
+  parameters.ValidateIssuer = true;
+  parameters.ValidIssuer = issuer;
+  parameters.ValidateSignature = true;
+  parameters.SignatureKey = signatureKey;
+  parameters.ValidateNotBefore = true;
+  parameters.ValidateExpiresAt = true;
+  parameters.ValidLifeTimeInMinutes = 5;
+  
+  
+  return parameters;
+}
+
+String DecodeBase64Url(String contents)
+{
+  String encoded = contents.substitute("-", "+").substitute("_", "/");
+  Byte[] decoded = decodeBase64(encoded);
+  return String(decoded);
+}
+
+
+String EncodeBase64Url(String data)
+{
+  String payload = encodeBase64(data.toByteArray(), false)
+     .substitute("+", "-")
+     .substitute("/", "_")
+     .substitute("=", "");
+  
+  return payload;
+}
+                                                            
+
+Byte[] DecodeBase64UrlAsBytes(String contents)
+{
+  String encoded = contents.substitute("-", "+").substitute("_", "/");
+  Byte[] decoded = decodeBase64(encoded);
+  return decoded;
+}
+
+Byte[] CreateSignature(String contents, String key)
+{
+  return encodeHMACSHA256(key, contents);
+}
+
+JwtValidationResult SetErrorMessage(JwtValidationResult result, String errorMessage)
+{
+  result.IsValid = false;
+  result.ErrorMessage = errorMessage;
+  return result;
+}
+
+Integer CalculateTimeDifference(Integer secondsSinceUnixEpoch)
+{
+  TimeZone localTimeZone = getLocalTimeZone();
+  DateTime time;
+  time.setUnix(secondsSinceUnixEpoch);
+   
+  DateTime now = getCurrentDateTime();
+  Integer differenceInSeconds = time.diff(now);
+  return differenceInSeconds / 60;
+}
+
+Bool CompareByteArray(Byte[] left, Byte[] right)
+{
+  if (left.length() != right.length())
+  {
+    return false;
+  }
+
+  for(Integer i=0;i<right.length(); i++)
+  {
+    if (left[i] != right[i])
+      return false;
+  }
+
+  return true;
+}
+
+JwtValidationResult ParseJwt(JwtValidationParameters parameters, String jwt)
+{
+  JwtValidationResult result;  
+  result.IsValid = false;
+  
+  String[] parts = jwt.split(".");
+  
+  if (parts.length() != 3)
+  {
+    return SetErrorMessage(result, "Invalid JWT. Missing parts.");
+  }
+  
+  XMLNode header = parseJSON(DecodeBase64Url(parts[0]));
+  String algorithm = header.getValueFromPath("alg");
+  String type = header.getValueFromPath("typ");
+  
+  if (type != "JWT") {
+    return SetErrorMessage(result, "Type is not JWT.");
+  }
+      
+  if (parameters.ValidateSignature) 
+  {
+    if (algorithm != "HS256") 
+    {
+    	return SetErrorMessage(result, "Invalid algorithm " + algorithm + ". Only HS256 is supported.");
+    }
+    
+    Byte[] key = decodeBase64(parameters.SignatureKey);    
+    
+    if (key.length() != 32)    
+    {
+      return SetErrorMessage(result, "Key must be 32 bytes/256 bit");
+    }
+    
+    Byte[] signature = CreateSignature(parts[0] + "." + parts[1], String(key));
+   	Byte[] originalSignature = DecodeBase64UrlAsBytes(parts[2]);
+    
+    if (false == CompareByteArray(originalSignature, signature))
+    {
+      return SetErrorMessage(result, "Invalid signature");
+    }        
+  }
+  
+  result.Claims = parseJSON(DecodeBase64Url(parts[1]));  
+  if (parameters.ValidateIssuer)
+  {
+    if (parameters.ValidIssuer.isEmpty())
+      return SetErrorMessage(result, "No valid issuer supplied.");    
+    
+    String issuer = result.Claims.getValueFromPath("iss");
+    if (parameters.ValidIssuer != issuer)
+    {
+      return SetErrorMessage(result, "Invalid issuer: " + issuer);
+    }    
+  }
+  
+  if (parameters.ValidateAudience)
+  {
+    if (parameters.ValidAudience.isEmpty())
+      return SetErrorMessage(result, "No valid audience supplied.");
+    
+    String audience = result.Claims.getValueFromPath("aud");
+    if (parameters.ValidAudience != audience)
+    {
+      return SetErrorMessage(result, "Invalid audience: " + audience);
+    }
+  }
+  
+  if (parameters.ValidateNotBefore)
+  {
+  	// Check the iat value:
+    Integer notBefore = result.Claims.getValueFromPath("nbf").toInteger();
+    if (notBefore == 0)
+      return SetErrorMessage(result, "Missing nbf claim");
+    
+   	Integer minuteDifference = CalculateTimeDifference(notBefore);
+  	if (minuteDifference > parameters.ValidLifeTimeInMinutes)
+    {
+      return SetErrorMessage(result, "Token is not valid yet (nbf) " + minuteDifference.toString() + " minutes.");
+    }
+  }
+  
+  if (parameters.ValidateExpiresAt)
+  {
+    Integer expiredAt = result.Claims.getValueFromPath("exp").toInteger();
+    if (expiredAt == 0)
+    {
+      return SetErrorMessage(result, "Missing exp claim.");
+    }
+    
+    Integer minuteDifference = CalculateTimeDifference(expiredAt);
+    if (minuteDifference > parameters.ValidLifeTimeInMinutes)
+    {
+      return SetErrorMessage(result, "Token has exceeded its lifetime (expired) - " + minuteDifference.toString() + " minutes.");
+    }    
+  }
+     
+  result.IsValid = true;
+  return result;
+}
+
+
+String CreateJwt(JwtCreationParameters parameters, JSONBuilder payload)
+{
+  String header = EncodeBase64Url("{ \"alg\": \"HS256\", \"typ\": \"JWT\"}");
+  payload.addString("aud", parameters.Audience);
+  payload.addString("iss", parameters.Issuer);
+  payload.addInteger("nbf", parameters.NotBefore.getUnix());
+  payload.addInteger("exp", parameters.ExpiresAt.getUnix());
+  payload.finalize();
+ 	
+  String p = payload.getString();
+  String payloadEncoded = EncodeBase64Url(p);
+  
+  Byte[] key = decodeBase64(parameters.SignatureKey);    
+  Byte[] signature = CreateSignature(header + "." + payloadEncoded, String(key));
+  
+  String signatureEncoded = encodeBase64(signature, false)
+     .substitute("+", "-")
+     .substitute("/", "_")
+     .substitute("=", "");  	 
+
+  return header + "." + payloadEncoded + "." + signatureEncoded;
+}
+
+JwtCreationParameters CreateDefaultJwtCreationParameters(String audience, String issuer, String key)
+{
+  JwtCreationParameters newJwt;
+	DateTime NotBefore;
+	DateTime ExpiresAt;
+
+	ExpiresAt.addMin(5);
+	newJwt.Audience = audience;
+	newJwt.Issuer = issuer;
+	newJwt.NotBefore  = NotBefore;
+	newJwt.ExpiresAt = ExpiresAt;
+	newJwt.SignatureKey = key;
+  
+  return newJwt;
+}
+
