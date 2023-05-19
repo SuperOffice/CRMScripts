@@ -1,5 +1,7 @@
 #setLanguageLevel 3;
 
+exitWithMessage("Note, this library has been deprecated - see https://community.superoffice.com/no/technical/forums/api-forums/service-crmscript/breaking-change-related-to-customer-portal-authentication/");
+
 /*
  * Helpermethods for doing authentication related tasks.
  */
