@@ -1,0 +1,48 @@
+<div id='login'>
+    <form action="%AuthProgram%&action=login&nextAction=%nextAction%&noframework=%noframework%" method="post">
+    %IF:error!=""%
+    <div class='errorMessage'>
+      <img src='%WwwRoot%graphics/SevenCustomer/error.png' />&nbsp; Incorrect user name or password
+    </div>
+    %ENDIF%
+    
+    <label>User name</label>
+    <input type="text" name="username" size="19" value="%email%">
+    <br />
+    
+    <label>Password</label>
+    <input type="password" size="19" name="password">
+    <br />
+    <br />
+    
+    <input class="submitButton2" type="submit" name="ok" value="Sign in">
+    <br />
+    
+    <div>
+        <a href="%AuthProgram%&action=sendPassword">Forgot my password</a>
+    %IF:options.customNewPersonForm="true"%
+        <a style="float: right" href="%AuthProgram%&action=showForm&id=%options.newPersonFormKey%&_activeMenu=registerCust">Sign up</a>
+    %ELSE%
+        <a style="float: right" href="%AuthProgram%&action=registerCust">Sign up</a>
+    %ENDIF%
+    </div>
+    
+    </form>
+    
+    <input type='button'  value="Log in with Difi" onclick="difi_login()">
+    
+    
+    <script>
+    function difi_login() {
+      let url = new URL('https://oidc-ver1.difi.no/idporten-oidc-provider/authorize');
+      url.searchParams.append('client_id', '52aa0c83-8ee0-4a3b-b132-d0d7c2038547');
+      url.searchParams.append('scope', 'openid');
+      url.searchParams.append('response_type', 'code');
+     url.searchParams.append('redirect_uri', 'https://{environment}.superoffice.com/{tenant}/CS/scripts/customer.fcgi?action=safeParse&includeId=difi-login&key={key}');
+     url.searchParams.append('state', 'authorize');
+     window.location.assign(url);
+    }
+        
+    </script>
+    
+    </div>

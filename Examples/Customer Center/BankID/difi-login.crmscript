@@ -1,0 +1,95 @@
+%EJSCRIPT_START%
+  <%
+  
+  /*
+Add this to .html-file to start flow
+
+<input type='button'  value="Log in with difi" onclick="difi_login()">
+
+<script>
+function difi_login() {
+  let url = new URL('https://oidc-ver1.difi.no/idporten-oidc-provider/authorize');
+  url.searchParams.append('client_id', '52aa0c83-8ee0-......');
+  url.searchParams.append('scope', 'openid');
+  url.searchParams.append('response_type', 'code');
+  url.searchParams.append('redirect_uri', 'https://{environment}.superoffice.com/{tenant}/CS/scripts/customer.fcgi?action=safeParse&includeId=difi-login&key={key}');
+  url.searchParams.append('state', 'authorize');
+  window.location.assign(url);
+}
+
+#setLanguageLevel 3;
+#include 'lib-difi';
+
+Map m = getCgiVariables();
+printLine(m.toJson());
+
+String code = getCgiVariable("code");
+String state = getCgiVariable("state");
+
+if((state == "authorize") && (code != "")){
+
+  //https://difi.github.io/felleslosninger/oidc_guide_idporten.html#utstedelse-av-token-fra-token-endepunktet
+  String client_id = "52aa0c83-8ee0-4.....";
+  String client_secret = "7e16169f-.....";
+  String redirect_url = "https://{environment}.superoffice.com/{tenant}/CS/scripts/customer.fcgi?action=safeParse&includeId=difi-login&key={key}";
+
+  //Token-endpoint variables
+  String tEndpoint = "/token";
+
+  Map tHeaders;
+  tHeaders.insert("Content-Type", "application/x-www-form-urlencoded");
+
+  Map tValues;
+  tValues.insert("Accept", "*/*");
+  tValues.insert("client_id", client_id);
+  tValues.insert("client_secret", client_secret);
+  tValues.insert("grant_type", "authorization_code");
+  tValues.insert("redirect_uri", redirect_url);
+  tValues.insert("code", code);
+
+  String tResponse = difiHttpRequest("post", tEndpoint, tHeaders, tValues);
+
+  DifiToken token;
+  token.fromJson(tResponse);
+
+  printLine("tResponse: " + tResponse);
+  //UserInfo-endpoint variables
+  String uiEndpoint = "/userinfo";
+
+  Map uiHeaders;
+  uiHeaders.insert("Authorization", "Bearer " + token.access_token);
+
+  Map uiValues;
+
+  String uiResponse = difiHttpRequest("get", uiEndpoint, uiHeaders, uiValues);
+  printLine("uiResponse: " + uiResponse);
+  
+  DifiUserInfo userInfo;
+  userInfo.fromJson(uiResponse);
+
+  SearchEngine se; 
+  se.addFields("person", "person_id,userdef_id.string05");
+  se.addCriteria("person.userdef_id.string05", "Equals", userInfo.pid);
+  if(se.select() == 1){
+		printLine("Found 1 person with pid: " + userInfo.pid);
+    Integer customerId = se.getField(0).toInteger();
+    Customer c;
+    c.load(customerId);
+    c.login();
+
+    //Set HTTP headers
+    Map _headers;
+    _headers.insert("set-cookie", "custSessionKey=" + customerId.toString() + "-" + c.getValue("loginSessionKey")); 
+    _headers.insert("Location", "https://{environment}.superoffice.com/{tenant}/CS/scripts/customer.fcgi");
+
+    //Output headers:
+    String headers;
+    for (_headers.first(); !_headers.eof(); _headers.next())
+      headers += _headers.getKey() + ": " + _headers.getVal() + "\n";
+
+    setParserVariable("ej.headers", headers);
+  }
+  else{printLine("this failed");}
+}
+%>
+%EJSCRIPT_END%

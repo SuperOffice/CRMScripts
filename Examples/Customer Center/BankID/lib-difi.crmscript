@@ -1,0 +1,69 @@
+/*
+Helper-struct for returned token-request
+*/
+struct DifiToken {
+  String access_token;
+  String id_token;
+  String token_type;
+  Integer expires_in;
+  String refresh_token;
+  String scope;
+
+  String toJson() {
+    JSONBuilder jb;
+    this.toJson(jb);
+    return jb.getString();
+  }
+
+  /*
+  Parse json into this struct, with XMLNode
+  */
+  Void fromJson(String json) {
+    this.fromXMLNode(parseJSON(json));
+  }
+};
+
+
+/*
+Helper-struct for returned userInfo-request
+*/
+struct DifiUserInfo {
+  String sub;
+  String pid;
+
+  String toJson() {
+    JSONBuilder jb;
+    this.toJson(jb);
+    return jb.getString();
+  }
+
+  /*
+  Parse json into this struct, with XMLNode
+  */
+  Void fromJson(String json) {
+    this.fromXMLNode(parseJSON(json));
+  }
+};
+
+/*
+Helper-function for doing http-requests to difi
+*/
+String difiHttpRequest(String method, String endpoint, Map headers, Map values){  
+  String base_url = "https://oidc-ver1.difi.no/idporten-oidc-provider";
+
+  String url = base_url + endpoint;
+
+  HTTP h;
+
+  for (headers.first(); !headers.eof(); headers.next())
+    h.addHeader(headers.getKey(), headers.getVal());
+
+  for (values.first(); !values.eof(); values.next())
+    h.setValue(values.getKey(), values.getVal());
+
+  if(method == "post")
+    return(String(h.postAsStream(url)));
+
+  else if(method == "get")
+    return(String(h.postAsStream(url)));
+}
