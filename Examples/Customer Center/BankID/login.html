@@ -35,7 +35,7 @@
     <script>
     function difi_login() {
       let url = new URL('https://oidc-ver1.difi.no/idporten-oidc-provider/authorize');
-      url.searchParams.append('client_id', '52aa0c83-8ee0-4a3b-b132-d0d7c2038547');
+      url.searchParams.append('client_id', '52aa0c83-9.....');
       url.searchParams.append('scope', 'openid');
       url.searchParams.append('response_type', 'code');
      url.searchParams.append('redirect_uri', 'https://{environment}.superoffice.com/{tenant}/CS/scripts/customer.fcgi?action=safeParse&includeId=difi-login&key={key}');
