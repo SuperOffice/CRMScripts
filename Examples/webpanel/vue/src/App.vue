@@ -46,7 +46,7 @@ function getCookieValue(cookieName: string) {
 
 // Method to make an HTTP request using the cookie value
 async function makeHttpRequest() {
-  const value = getCookieValue("XSRF-TOKEN"); // Replace 'my_cookie' with the actual cookie name
+  const value = getCookieValue("XSRF-TOKEN");
   cookieValue.value = value || 'Cookie not found';
 
   if (value) {
@@ -72,7 +72,7 @@ async function makeHttpRequest() {
 
 // Fetch the cookie value when the app is mounted
 onMounted(() => {
-  makeHttpRequest(); // Replace 'my_cookie' with the actual cookie name
+  makeHttpRequest(); 
 });
 </script>
 
