@@ -10,15 +10,16 @@ Please refer to the [documentation](https://vuejs.org/) if you are unfamiliar wi
 1. Run `npm install`
 2. Run `npm run build`. This will build and compile the assets to `./dist/assets`.
 3. Upload the generated `index-xxxxx.js` and `index-xxxx.css` files from [./dist/assets](./dist/assets) as External documents in SuperOffice.
-4. Create a new CRMScript in SuperOffice and add the content from [wepbalen.crmscript](./src/crmscript/webpanel.crmscript). Note that `jsDocumentId` and `cssDocumentId` needs to be adjusted to fit your environment, and should be fetched during upload (Step 3).
+4. Create a new CRMScript in SuperOffice and add the content from [webpanel.crmscript](./src/crmscript/webpanel.crmscript). Note that `jsDocumentId` and `cssDocumentId` needs to be adjusted to fit your environment, and should be fetched during upload (Step 3).
 5. Create a new webpanel in SuperOffice, this example expects it to be visible in `Panel - Company screen section tab`.
 
 URL: `<csiu>/<uctx>/CS/scripts/customer.fcgi?action=safeParse&includeId=<YourScriptIncludeId>&key=<YourScriptSecret>`
 
+Note that `YourScriptIncludeId` and `YourScriptSecret` is set when creating the script, and needs to be adjusted in the URL above (replace these properties with what is in your environment).
+
 ![Webpanel](./media/image.png)
 
 6. Open a Company in SuperOffice and open the webpanel
-Note that `YourScriptIncludeId` and `YourScriptSecret` is set when creating the script, and needs to be adjusted in the URL above (replace these properties with what is in your environment).
 
 --------------------------------------------------------
 
