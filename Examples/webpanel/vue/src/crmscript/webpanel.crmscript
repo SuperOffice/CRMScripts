@@ -1,0 +1,41 @@
+%EJSCRIPT_START%
+<%
+#setLanguageLevel 4;
+
+String jsDocumentId = "36"; // This is the external_document_id for the javascript
+String cssDocumentId = "37"; // This is the external_document_id for the css
+
+String jsContent;
+String cssContent;
+
+SearchEngine se;
+se.addFields("external_document", "id,attachment_id");
+se.addCriteria("external_document.id", "OperatorIn", jsDocumentId + "," + cssDocumentId);
+for(se.select(); !se.eof(); se.next()){
+  Attachment att;
+  att.load(se.getField("external_document.attachment_id").toInteger());
+  if(se.getField("external_document.id") == jsDocumentId){
+    jsContent = att.getRaw();
+  }
+  else if(se.getField("external_document.id") == cssDocumentId){
+    cssContent = att.getRaw();
+  }
+}
+
+%>
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vite App</title>
+    <script type="module"><%print(jsContent);%></script>
+    <style><%print(cssContent);%></style>
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+</html>
+
+%EJSCRIPT_END%
